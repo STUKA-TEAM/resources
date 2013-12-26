@@ -31,7 +31,7 @@ public class ImageUtil {
 	public String saveMutiSize(InputStream input){
 		try{
 			String imageID = generateRandomImageID();
-			String saveInDataBase =  Constant.IMAGE_NORMAL_PATH + imageID;
+			String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
 			
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			org.apache.commons.io.IOUtils.copy(input, baos);
@@ -52,10 +52,55 @@ public class ImageUtil {
 			}
 		}catch(Exception e){
 			return "";
-		}
-		
+		}		
 	}
-	 
+	
+	/**
+	 * @Description: 只生成原始尺寸大小的图片
+	 * @param input
+	 * @return
+	 */
+	public String saveOriginalSize(InputStream input){
+		try {
+			String imageID = generateRandomImageID();
+			String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
+			
+			Boolean saveOrigin = scaleRatio(input, Constant.ORIGINAL_IMAGE_WIDTH, 
+					imageID, Constant.ORIGINAL_IMAGE); 
+			
+			if(saveOrigin){
+				return saveInDataBase;
+			}else {
+				return "";
+			}
+		} catch (Exception e) {
+			return "";
+		}
+	}
+	
+	/**
+	 * @Description: 只生成正方形大小的图片   specially for elove
+	 * @param input
+	 * @return
+	 */
+	public String saveSquareSize(InputStream input){
+		try {
+			String imageID = generateRandomImageID();
+			String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
+			
+			Boolean saveSquare = scaleCut(input, Constant.SQUARE_LENGTH, 
+					Constant.SQUARE_LENGTH, imageID, Constant.BIG_SQUARE);
+			
+			if (saveSquare) {
+				return saveInDataBase;
+			}else {
+				return "";
+			}			
+		} catch (Exception e) {
+			return "";
+		}
+	}
+	
 /**
  * 
  * @param srcImage 图片输入流
