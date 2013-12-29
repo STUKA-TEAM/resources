@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import tools.CommonValidationTools;
 import tools.ImageUtil;
-import tools.UploadImageResponseMessage;
+import tools.UploadResponseMessage;
 
 import com.google.gson.Gson;
 
@@ -32,38 +32,40 @@ public class UploadImageController {
      */
 	@RequestMapping(value = "/image/multi", method = RequestMethod.POST)
 	@ResponseBody
-	 public String multiImageUpload(
-        @RequestParam("file") MultipartFile fileFromForm) {
-		UploadImageResponseMessage responseMessage = new UploadImageResponseMessage();
+	 public String multiImageUpload(@RequestParam("file") MultipartFile fileFromForm) {
+		UploadResponseMessage responseMessage = new UploadResponseMessage();
 		  Gson gson = new Gson();
 		  if (!fileFromForm.isEmpty()) {
               try {
 				InputStream inputStream = fileFromForm.getInputStream();		
-				CommonValidationTools commonValidationTools = new CommonValidationTools();
-	
+				CommonValidationTools commonValidationTools = new CommonValidationTools();	
 				if (!commonValidationTools.checkImageSize(fileFromForm)) {
 					responseMessage.setStatus(false);
 					responseMessage.setMessage("文件大小超过限制！");
-					return gson.toJson(responseMessage);
-				}else {
+				}
+				else {
 					ImageUtil imageUtil = new ImageUtil();
 					String relativePathID = imageUtil.saveMutiSize(inputStream);
-					responseMessage.setStatus(true);
-					responseMessage.setMessage("上传成功！");
-					responseMessage.setLink(relativePathID);					
-					return gson.toJson(responseMessage);
-				}
-				
+					if (relativePathID != "") {
+						responseMessage.setStatus(true);
+						responseMessage.setMessage("上传成功！");
+						responseMessage.setLink(relativePathID);
+					}
+					else {
+						responseMessage.setStatus(false);
+						responseMessage.setMessage("文件保存失败，请重新上传");					
+					}				
+				}				
 			} catch (IOException e) {
 				responseMessage.setStatus(false);
 				responseMessage.setMessage("上传失败！");
-				return gson.toJson(responseMessage);
 			}                  
-		  }else {
+		  }
+		  else {
               responseMessage.setStatus(false);
 			  responseMessage.setMessage("请选择文件！");
-			  return gson.toJson(responseMessage); 
-		}
+		  }
+		  return gson.toJson(responseMessage); 
     }
 	
 	/**
@@ -75,7 +77,7 @@ public class UploadImageController {
 	@ResponseBody
 	 public String originalImageUpload(
         @RequestParam("file") MultipartFile fileFromForm) {
-		UploadImageResponseMessage responseMessage = new UploadImageResponseMessage();
+		UploadResponseMessage responseMessage = new UploadResponseMessage();
 		  Gson gson = new Gson();
 		  if (!fileFromForm.isEmpty()) {
               try {
@@ -116,7 +118,7 @@ public class UploadImageController {
 	@ResponseBody
 	 public String squareImageUpload(
         @RequestParam("file") MultipartFile fileFromForm) {
-		UploadImageResponseMessage responseMessage = new UploadImageResponseMessage();
+		UploadResponseMessage responseMessage = new UploadResponseMessage();
 		  Gson gson = new Gson();
 		  if (!fileFromForm.isEmpty()) {
               try {

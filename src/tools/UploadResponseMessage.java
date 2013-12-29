@@ -7,7 +7,7 @@ package tools;
  * @author ben
  * @date 2013年12月20日
  */
-public class UploadImageResponseMessage extends ResponseMessage{
+public class UploadResponseMessage extends ResponseMessage{
 private String link;
 
 public String getLink() {

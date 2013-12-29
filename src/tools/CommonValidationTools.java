@@ -67,6 +67,20 @@ public class CommonValidationTools {
 	}
 	
 	/**
+	 * 
+	 * @param multipartFile
+	 * @return 是否是视频格式
+	 */
+	public boolean checkVideoType(MultipartFile multipartFile) {
+		if (multipartFile.getContentType().equals("video/mp4")  
+				|| multipartFile.getContentType().equals("video/webm")) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	/**
      * @Title: getLength
      * @Description: detect the length of one sentence
      * @param text

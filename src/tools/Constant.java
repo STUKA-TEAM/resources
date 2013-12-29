@@ -32,4 +32,8 @@ public final class Constant {
     //缩略图，形状为正方形，边长为50px;
     public static final String SMALL_IMAGE = "_small.jpg";
     public static final int SAMLL_IMAGE_WIDTH = 65;
+    
+    /*video*/
+    public static final String VIDEO_NORMAL_PATH = "/media/";
+    public static final String VIDEO_DATABASE_PATH = "/resources/media/";
 }

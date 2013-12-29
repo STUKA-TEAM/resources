@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="zhonghe">
+
+    <title>众合微信公共账号管理平台</title>
+    <!-- Bootstrap core CSS -->
+    <link href="./css/store/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/store/zhonghe-wechat.css" rel="stylesheet">
+    <link rel="shortcut icon" href="./img/favicon.jpg">
+    <!-- include jQuery + carouFredSel plugin -->
+		<script type="text/javascript" src="./js/store/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="./js/store/jquery.carouFredSel-6.2.1-packed.js"></script>
+    <!-- fire plugin onDocumentReady -->
+		<script type="text/javascript">
+			$(function() {
+				//	Scrolled by user interaction
+				$('#case_ul').carouFredSel({
+					auto: false,
+					prev: '#prev',
+					next: '#next',
+					pagination: "#pager2",
+					mousewheel: true,
+					swipe: {
+						onMouse: true,
+						onTouch: true
+					}
+				});
+        
+        // pop up #example1, #example2, #example3 with same content
+        $('[rel=popover]').popover({ 
+            html : true, 
+            content: function() {
+              return $('#popover_content_wrapper').html();
+            }
+        });
+
+			});
+		</script>
+  </head>
+  <body>
+    <!-- Fixed navbar -->
+    <div class="navbar navbar-default navbar-white navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#"><img src="./img/logo.png" alt="Zhonghe Software" /></a>
+        </div>
+        
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right nav-login">
+            <li><a href="#"  rel="popover" data-placement="bottom"><img src="./img/login.png"/><span class="login">登录</span></a></li>
+            <li><a href="./register.html"><span class="register">没有账号？立即加入</span></a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!-- container -->
+    </div><!-- navbar -->
+    <div id="popover_content_wrapper" class= "login-container">
+      <div class="login-form">
+        <div class="control-group">
+          <input type="text" class="form-control login-field" value="" placeholder="用户名" id="login-name" />
+        </div>
+
+        <div class="control-group">
+          <input type="password" class="form-control login-field" value="" placeholder="******" id="login-pass" />
+        </div>
+        <div class="checkbox">
+          <label>
+            <input id="login_checkbox" type="checkbox"> 记住我
+          </label>
+        </div>
+        <a class="btn btn-success btn-large btn-block" href="#">登录</a>
+        <a class="login-link" href="#">忘记密码?</a>
+      </div>
+    </div>
+    <!-- Carousel
+    ================================================== -->
+    <div id="myCarousel" class="carousel slide" data-ride="carousel">
+      <!-- Indicators -->
+      <ol class="carousel-indicators">
+        <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+        <li data-target="#myCarousel" data-slide-to="1"></li>
+        <li data-target="#myCarousel" data-slide-to="2"></li>
+      </ol>
+      <div class="carousel-inner">
+        <div class="item active">
+          <img src="./img/carousel1.jpg" alt="First slide">
+        </div>
+        <div class="item">
+          <img src="./img/carousel2.jpg" alt="Second slide">
+        </div>
+        <div class="item">
+          <img src="./img/carousel3.jpg" alt="Third slide">
+        </div>
+      </div>
+      <a class="left carousel-control" href="#myCarousel" data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
+      <a class="right carousel-control" href="#myCarousel" data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
+    </div><!-- /.carousel -->
+    <div class="container">
+      <div  class="content-title">
+        <img class="pull-left" src="./img/gonggao.png" alt="公告">
+        <p class="lead">微网站新增17款精美模板</p>
+      </div>
+      <ul class="bs-glyphicons">
+        <li>
+          <img src="./img/wechat_vote.png" class="img-rounded" alt="微投票">
+          <span class="glyphicon-class">微投票</span>
+        </li>
+        <li>
+          <img src="./img/wechat_activities.png" class="img-rounded" alt="微活动">
+          <span class="glyphicon-class">微活动</span>
+        </li>
+        <li>
+          <img src="./img/wechat_message.png" class="img-rounded" alt="微留言">
+          <span class="glyphicon-class">微留言</span>
+        </li>
+        <li>
+          <img src="./img/wechat_home.png" class="img-rounded" alt="微主页">
+          <span class="glyphicon-class">微主页</span>
+        </li>
+        <li>
+          <img src="./img/wechat_questionnaire.png" class="img-rounded" alt="微问卷">
+          <span class="glyphicon-class">微问卷</span>
+        </li>
+        <li>
+          <img src="./img/wechat_tools.png" class="img-rounded" alt="微工具">
+          <span class="glyphicon-class">微工具</span>
+        </li>
+      </ul>
+    </div> <!-- /container -->
+    
+    <div class="container">
+      <div  class="content-title">
+        <img class="pull-left" src="./img/anli.png" alt="案例展示">
+      </div>
+      <div class="content">
+      <div class="list_carousel">
+        <a id="prev" class="carousel-arrow pull-left" href="#"><img src="./img/arrow-left.png"/></a>
+				<a id="next" class="carousel-arrow pull-right" href="#"><img src="./img/arrow-right.png"/></a>
+				<ul id="case_ul">
+					<li><img src="./img/demo.jpg"/></li>
+					<li><img src="./img/demo2.jpg"/></li>
+					<li><img src="./img/demo3.jpg"/></li>
+					<li><img src="./img/demo4.jpg"/></li>
+					<li><img src="./img/demo5.jpg"/></li>
+				</ul>
+			</div>
+      </div>
+    </div> <!-- /container -->
+    
+    <div id="footer">
+      <div class="container" style="text-align:center">
+        <p class="text-muted credit">Copyright © 2013 zhonghesoftware.com All Rights Reserved. 众合网络科技有限公司 版权所有</p>
+      </div>
+    </div><!-- footer -->
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./js/store/bootstrap.min.js"></script>
+  </body>
+</html>
