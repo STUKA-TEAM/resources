@@ -44,9 +44,8 @@ public class UploadImageController {
 		  Gson gson = new Gson();
 		  if (!fileFromForm.isEmpty()) {
               try {
-				InputStream inputStream = fileFromForm.getInputStream();		
-				CommonValidationTools commonValidationTools = new CommonValidationTools();	
-				if (!commonValidationTools.checkImageSize(fileFromForm)) {
+				InputStream inputStream = fileFromForm.getInputStream();			
+				if (!CommonValidationTools.checkImageSize(fileFromForm)) {
 					responseMessage.setStatus(false);
 					responseMessage.setMessage("文件大小超过限制！");
 				} else {
@@ -95,10 +94,8 @@ public class UploadImageController {
 		  Gson gson = new Gson();
 		  if (!fileFromForm.isEmpty()) {
               try {
-				InputStream inputStream = fileFromForm.getInputStream();		
-				CommonValidationTools commonValidationTools = new CommonValidationTools();
-	
-				if (!commonValidationTools.checkImageSize(fileFromForm)) {
+				InputStream inputStream = fileFromForm.getInputStream();			
+				if (!CommonValidationTools.checkImageSize(fileFromForm)) {
 					responseMessage.setStatus(false);
 					responseMessage.setMessage("文件大小超过限制！");
 				} else {
@@ -149,9 +146,7 @@ public class UploadImageController {
 		  if (!fileFromForm.isEmpty()) {
               try {
 				InputStream inputStream = fileFromForm.getInputStream();		
-				CommonValidationTools commonValidationTools = new CommonValidationTools();
-	
-				if (!commonValidationTools.checkImageSize(fileFromForm)) {
+				if (!CommonValidationTools.checkImageSize(fileFromForm)) {
 					responseMessage.setStatus(false);
 					responseMessage.setMessage("文件大小超过限制！");
 				} else {

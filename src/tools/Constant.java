@@ -34,6 +34,6 @@ public final class Constant {
     public static final int SAMLL_IMAGE_WIDTH = 65;
     
     /*video*/
-    public static final String VIDEO_NORMAL_PATH = "/media/";
-    public static final String VIDEO_DATABASE_PATH = "/resources/media/";
+    public static final String MEDIA_NORMAL_PATH = "/media/";
+    public static final String MEDIA_DATABASE_PATH = "/resources/media/";
 }

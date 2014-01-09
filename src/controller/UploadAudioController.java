@@ -21,42 +21,42 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import tools.CommonValidationTools;
 import tools.Constant;
 import tools.UploadResponseMessage;
 
 import com.google.gson.Gson;
 
 /**
- * @Title: UploadVideoController
- * @Description: control video upload 
+ * @Title: UploadAudioController
+ * @Description: control audio upload 
  * @Company: ZhongHe
  * @author ben
- * @date 2013年12月29日
+ * @date 2013年1月9日
  */
 @Controller
-public class UploadVideoController {
+public class UploadAudioController {
     /**
-     * @Description: 上传视频	
+     * @Description: 上传音乐
      * @param fileFromForm
      * @return
      */
-	@RequestMapping(value = "/video", method = RequestMethod.POST)
+	@RequestMapping(value = "/audio", method = RequestMethod.POST)
 	@ResponseBody
-	 public String videoUpload(
+	 public String audioUpload(
         @RequestParam("file") MultipartFile fileFromForm) {
 		UploadResponseMessage responseMessage = new UploadResponseMessage();
 		Gson gson = new Gson();
 		if (!fileFromForm.isEmpty()) {
 			try {
 				InputStream inputStream = fileFromForm.getInputStream();
-				/*CommonValidationTools commonValidationTools = new CommonValidationTools();
-				if (!commonValidationTools.checkVideoType(fileFromForm)) {
+				if (!CommonValidationTools.checkAudioType(fileFromForm)) {
 					responseMessage.setStatus(false);
-					responseMessage.setMessage("请选择mp4或webm格式视频！");
+					responseMessage.setMessage("请选择mp3格式音频！");
 				}
-				else {*/
-					String videoType = fileFromForm.getContentType().replace("video/", "");					
-					String relativePathID = saveVideoFile(inputStream, videoType);
+				else {
+					String audioType = fileFromForm.getContentType().replace("audio/", "");					
+					String relativePathID = saveAudioFile(inputStream, audioType);
 					if (relativePathID != "") {                  
 						ApplicationContext context = 
 								new ClassPathXmlApplicationContext("All-Modules.xml");
@@ -68,9 +68,6 @@ public class UploadVideoController {
 						video.setCreateDate(new Timestamp(System.currentTimeMillis()));
 						tempVideoDao.insertVideoTempRecord(video);
 						
-						String videoPath = getVideoPath(relativePathID).substring(1).replace('/', '\\');					
-						new Thread(new VideoConvert(videoType, videoPath)).start();	
-						
 						responseMessage.setStatus(true);
 						responseMessage.setMessage("上传成功！");
 						responseMessage.setLink(relativePathID);
@@ -79,7 +76,7 @@ public class UploadVideoController {
 						responseMessage.setStatus(false);
 						responseMessage.setMessage("文件保存失败，请重新上传");					
 					}
-			//	}
+				}
 			} catch (IOException e) {
 				responseMessage.setStatus(false);
 				responseMessage.setMessage("上传失败！");
@@ -93,21 +90,21 @@ public class UploadVideoController {
     }
 	
 	/**
-	 * @title: saveVideoFile
-	 * @description: 把视频文件存储到服务器上
+	 * @title: saveAudioFile
+	 * @description: 把音频文件存储到服务器上
 	 * @param input
-	 * @param videoType
+	 * @param audioType
 	 * @return
 	 */
-	private String saveVideoFile(InputStream input, String videoType){
+	private String saveAudioFile(InputStream input, String audioType){
 		try {
-			String videoID = generateRandomImageID();
-			String saveInDataBase =  Constant.MEDIA_DATABASE_PATH + videoID;
+			String audioID = generateRandomImageID();
+			String saveInDataBase =  Constant.MEDIA_DATABASE_PATH + audioID;
 			
 			//save to server
 			String classPath = this.getClass().getClassLoader().getResource("/").getPath();
 			String savePath = classPath.replaceAll("/WEB-INF/classes/", Constant.MEDIA_NORMAL_PATH);
-			File file = new File(savePath + videoID + "_temp." + videoType);
+			File file = new File(savePath + audioID + "." + audioType);
 			OutputStream out=new FileOutputStream(file);
 			int read = 0;
 			byte[] bytes = new byte[1024];			 
@@ -124,19 +121,6 @@ public class UploadVideoController {
 	}
 	
 	/**
-	 * @title: getVideoPath
-	 * @description: 根据数据库存储地址获取实际可用地址
-	 * @param saveInDataBase
-	 * @return
-	 */
-	private String getVideoPath(String saveInDataBase){
-		String videoPath = saveInDataBase.replaceAll(Constant.MEDIA_DATABASE_PATH,
-				Constant.MEDIA_NORMAL_PATH);
-		String classPath = this.getClass().getClassLoader().getResource("/").getPath();
-		return classPath.replaceAll("/WEB-INF/classes/", videoPath);
-	}
-	
-    /**
      * @title: generateRandomImageID
      * @description: 生成文件名
      * @return
