@@ -2,7 +2,14 @@ package controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 
+import model.TempImage;
+import model.dao.TempImageDAO;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,16 +49,24 @@ public class UploadImageController {
 				if (!commonValidationTools.checkImageSize(fileFromForm)) {
 					responseMessage.setStatus(false);
 					responseMessage.setMessage("文件大小超过限制！");
-				}
-				else {
+				} else {
 					ImageUtil imageUtil = new ImageUtil();
 					String relativePathID = imageUtil.saveMutiSize(inputStream);
 					if (relativePathID != "") {
+						ApplicationContext context = 
+								new ClassPathXmlApplicationContext("All-Modules.xml");
+						TempImageDAO tempImageDao = (TempImageDAO) context.getBean("TempImageDAO");
+						((ConfigurableApplicationContext)context).close();
+						
+						TempImage image = new TempImage();
+						image.setImagePath(relativePathID);
+						image.setCreateDate(new Timestamp(System.currentTimeMillis()));
+						tempImageDao.insertImageTempRecord(image);
+						
 						responseMessage.setStatus(true);
 						responseMessage.setMessage("上传成功！");
 						responseMessage.setLink(relativePathID);
-					}
-					else {
+					} else {
 						responseMessage.setStatus(false);
 						responseMessage.setMessage("文件保存失败，请重新上传");					
 					}				
@@ -60,8 +75,7 @@ public class UploadImageController {
 				responseMessage.setStatus(false);
 				responseMessage.setMessage("上传失败！");
 			}                  
-		  }
-		  else {
+		  } else {
               responseMessage.setStatus(false);
 			  responseMessage.setMessage("请选择文件！");
 		  }
@@ -87,26 +101,38 @@ public class UploadImageController {
 				if (!commonValidationTools.checkImageSize(fileFromForm)) {
 					responseMessage.setStatus(false);
 					responseMessage.setMessage("文件大小超过限制！");
-					return gson.toJson(responseMessage);
-				}else {
+				} else {
 					ImageUtil imageUtil = new ImageUtil();
 					String relativePathID = imageUtil.saveOriginalSize(inputStream);
-					responseMessage.setStatus(true);
-					responseMessage.setMessage("上传成功！");
-					responseMessage.setLink(relativePathID);					
-					return gson.toJson(responseMessage);
+					if (relativePathID != "") {
+						ApplicationContext context = 
+								new ClassPathXmlApplicationContext("All-Modules.xml");
+						TempImageDAO tempImageDao = (TempImageDAO) context.getBean("TempImageDAO");
+						((ConfigurableApplicationContext)context).close();
+						
+						TempImage image = new TempImage();
+						image.setImagePath(relativePathID);
+						image.setCreateDate(new Timestamp(System.currentTimeMillis()));
+						tempImageDao.insertImageTempRecord(image);
+						
+						responseMessage.setStatus(true);
+						responseMessage.setMessage("上传成功！");
+						responseMessage.setLink(relativePathID);
+					} else {
+						responseMessage.setStatus(false);
+						responseMessage.setMessage("文件保存失败，请重新上传");	
+					}
 				}
 				
 			} catch (IOException e) {
 				responseMessage.setStatus(false);
 				responseMessage.setMessage("上传失败！");
-				return gson.toJson(responseMessage);
 			}                  
-		  }else {
+		  } else {
               responseMessage.setStatus(false);
 			  responseMessage.setMessage("请选择文件！");
-			  return gson.toJson(responseMessage); 
-		}
+		  }
+		  return gson.toJson(responseMessage);   
     }
 	
 	/**
@@ -128,26 +154,37 @@ public class UploadImageController {
 				if (!commonValidationTools.checkImageSize(fileFromForm)) {
 					responseMessage.setStatus(false);
 					responseMessage.setMessage("文件大小超过限制！");
-					return gson.toJson(responseMessage);
-				}else {
+				} else {
 					ImageUtil imageUtil = new ImageUtil();
 					String relativePathID = imageUtil.saveSquareSize(inputStream);
-					responseMessage.setStatus(true);
-					responseMessage.setMessage("上传成功！");
-					responseMessage.setLink(relativePathID);					
-					return gson.toJson(responseMessage);
+					if (relativePathID != "") {
+						ApplicationContext context = 
+								new ClassPathXmlApplicationContext("All-Modules.xml");
+						TempImageDAO tempImageDao = (TempImageDAO) context.getBean("TempImageDAO");
+						((ConfigurableApplicationContext)context).close();
+						
+						TempImage image = new TempImage();
+						image.setImagePath(relativePathID);
+						image.setCreateDate(new Timestamp(System.currentTimeMillis()));
+						tempImageDao.insertImageTempRecord(image);
+						
+						responseMessage.setStatus(true);
+						responseMessage.setMessage("上传成功！");
+						responseMessage.setLink(relativePathID);
+					} else {
+						responseMessage.setStatus(false);
+						responseMessage.setMessage("文件保存失败，请重新上传");	
+					}					
 				}
 				
 			} catch (IOException e) {
 				responseMessage.setStatus(false);
 				responseMessage.setMessage("上传失败！");
-				return gson.toJson(responseMessage);
 			}                  
-		  }else {
+		  } else {
               responseMessage.setStatus(false);
 			  responseMessage.setMessage("请选择文件！");
-			  return gson.toJson(responseMessage); 
-		}
-    }
-	
+		  }
+		  return gson.toJson(responseMessage); 
+    }	
 }

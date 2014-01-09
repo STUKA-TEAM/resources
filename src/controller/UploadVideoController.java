@@ -5,11 +5,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.sql.Timestamp;
 import java.util.UUID;
 
+import model.TempVideo;
+import model.dao.TempVideoDAO;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -53,39 +57,23 @@ public class UploadVideoController {
 				else {*/
 					String videoType = fileFromForm.getContentType().replace("video/", "");					
 					String relativePathID = saveVideoFile(inputStream, videoType);
-					if (relativePathID != "") {
-						String videoPath = getVideoPath(relativePathID).substring(1).replace('/', '\\');
+					if (relativePathID != "") {                  
+						ApplicationContext context = 
+								new ClassPathXmlApplicationContext("All-Modules.xml");
+						TempVideoDAO tempVideoDao = (TempVideoDAO) context.getBean("TempVideoDAO");
+						((ConfigurableApplicationContext)context).close();
 						
-						InputStream input = UploadVideoController.class.getResourceAsStream("/environment.properties");
-						Properties properties = new Properties();
-						String ffmpegPath = null;
-						try {
-							properties.load(input);
-							ffmpegPath = (String)properties.get("ffmpegPath");
-						} catch (Exception e) {
-							System.out.println(e.getMessage());
-						}
+						TempVideo video = new TempVideo();
+						video.setVideoPath(relativePathID);
+						video.setCreateDate(new Timestamp(System.currentTimeMillis()));
+						tempVideoDao.insertVideoTempRecord(video);
 						
-						if (ffmpegPath != null) {
-							boolean testMp4 = getMp4(ffmpegPath, videoPath, videoType);
-							boolean testWebm = getWebm(ffmpegPath, videoPath, videoType);
-							if (testMp4 && testWebm) {
-								deleteFile(videoPath + "." + videoType);
-								responseMessage.setStatus(true);
-								responseMessage.setMessage("上传成功！");
-								responseMessage.setLink(relativePathID);
-							}else {
-								deleteFile(videoPath + "." + videoType);
-								deleteFile(videoPath + "_standard.mp4");
-								deleteFile(videoPath + "_standard.webm");
-								responseMessage.setStatus(false);
-								responseMessage.setMessage("视频上传失败!请选择其他类型上传");
-							}
-						}else {
-							deleteFile(videoPath + "." + videoType);
-							responseMessage.setStatus(false);
-							responseMessage.setMessage("系统配置信息丢失");
-						}						
+						String videoPath = getVideoPath(relativePathID).substring(1).replace('/', '\\');					
+						new Thread(new VideoConvert(videoType, videoPath)).start();	
+						
+						responseMessage.setStatus(true);
+						responseMessage.setMessage("上传成功！");
+						responseMessage.setLink(relativePathID);
 					}
 					else {
 						responseMessage.setStatus(false);
@@ -157,162 +145,4 @@ public class UploadVideoController {
         String randomImageID = UUID.randomUUID().toString().replace("-", "");
         return randomImageID;
     }
-    
-    /**
-     * @title: getMp4
-     * @description: 将视频转换成mp4格式
-     * @param ffmpegPath
-     * @param filename
-     * @param oldType
-     * @return
-     */
-    private static boolean getMp4(String ffmpegPath, String filename, String oldType) {
-		List<String> command = new ArrayList<String>();		
-		command.add(ffmpegPath);
-		command.add("-i");
-		command.add(filename + "." + oldType);
-		command.add(filename + "_standard.mp4");
-		try {
-			 ProcessBuilder builder = new ProcessBuilder(); 
-             builder.command(command);
-             Process process = builder.start(); 
-             doWaitFor(process);  
-             process.destroy();
-             if (!checkFile(filename + "_standard.mp4")) {
- 				return false;
- 			 }
-			 return true;
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			return false;
-		}
-	}
-    
-    /**
-     * @title: getWebm
-     * @description: 将视频转换成webm格式
-     * @param ffmpegPath
-     * @param filename
-     * @param oldType
-     * @return
-     */
-    private static boolean getWebm(String ffmpegPath, String filename, String oldType) {
-		List<String> command = new ArrayList<String>();		
-		command.add(ffmpegPath);
-		command.add("-i");
-		command.add(filename + "." + oldType);
-        command.add("-acodec");
-        command.add("libvorbis");
-		command.add("-aq");
-		command.add("5");
-		command.add("-ac");
-		command.add("2");
-		command.add("-vcodec");
-        command.add("libvpx");
-		command.add("-qmax");
-		command.add("25");
-		command.add("-threads");
-		command.add("0");
-		command.add(filename + "_standard.webm");
-		try {
-			 ProcessBuilder builder = new ProcessBuilder(); 
-             builder.command(command);
-             Process process = builder.start(); 
-             doWaitFor(process);  
-             process.destroy();
-        	
-             if (!checkFile(filename + "_standard.webm")) {
-				return false;
-			 }
-			 return true;
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			return false;
-		}
-	}
-    
-    /**
-     * @title: checkFile
-     * @description: 确认转换后的文件是完整的
-     * @param path
-     * @return
-     */
-    private static boolean checkFile(String path) {  
-        File file = new File(path);  
-        if (!file.isFile()) {  
-            return false;  
-        } else {  
-            return true;  
-        }  
-    } 
-    
-    /**
-     * @title: deleteFile
-     * @description: 删除文件
-     * @param filepath
-     * @return
-     */
-    private static boolean deleteFile(String filepath) {  
-        File file = new File(filepath);  
-        if (file.exists() && file.isFile()) {
-			return file.delete();
-		}
-        return false;
-    } 
-    
-    /**
-     * @title: doWaitFor
-     * @description: 等待进程执行结束
-     * @param p
-     * @return
-     */
-    private static int doWaitFor(Process p) {  
-        InputStream in = null;  
-        InputStream err = null;  
-        int exitValue = -1; // returned to caller when p is finished  
-        try {  
-            System.out.println("coming");  
-            in = p.getInputStream();  
-            err = p.getErrorStream();  
-            boolean finished = false; // Set to true when p is finished  
-   
-            while (!finished) {  
-                try {  
-                    while (in.available() > 0) {  
-                        Character c = new Character((char) in.read());  
-                        System.out.print(c);  
-                    }  
-                    while (err.available() > 0) {  
-                        Character c = new Character((char) err.read());  
-                        System.out.print(c);  
-                    }  
-   
-                    exitValue = p.exitValue();  
-                    finished = true;  
-   
-                } catch (IllegalThreadStateException e) {  
-                    Thread.sleep(500);  
-                }  
-            }            
-        } catch (Exception e) {  
-            System.err.println("doWaitFor(): unexpected exception - "  
-                    + e.getMessage());  
-        } finally {  
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					System.out.println(e.getMessage());
-				}
-			}
-            if (err != null) {  
-                try {  
-                    err.close();  
-                } catch (IOException e) {  
-                    System.out.println(e.getMessage());  
-                }  
-            }  
-        }  
-        return exitValue;  
-    }  
 }
