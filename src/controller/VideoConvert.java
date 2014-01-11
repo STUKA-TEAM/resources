@@ -33,6 +33,7 @@ public class VideoConvert implements Runnable {
 			boolean testWebm = getWebm(ffmpegPath, videoPath, videoType);
 			if (testMp4 && testWebm) {
 				deleteFile(videoPath + "_temp." + videoType);
+				System.out.println("convert to mp4 and webm successfully!");
 			}else {
 				deleteFile(videoPath + ".mp4");
 				deleteFile(videoPath + ".webm");
@@ -162,7 +163,7 @@ public class VideoConvert implements Runnable {
         InputStream err = null;  
         int exitValue = -1; // returned to caller when p is finished  
         try {  
-            System.out.println("coming");  
+            System.out.println("start");  
             in = p.getInputStream();  
             err = p.getErrorStream();  
             boolean finished = false; // Set to true when p is finished  
@@ -170,12 +171,12 @@ public class VideoConvert implements Runnable {
             while (!finished) {  
                 try {  
                     while (in.available() > 0) {  
-                        Character c = new Character((char) in.read());  
-                        System.out.print(c);  
+                      /*Character c = new Character((char) in.read());  
+                        System.out.print(c); */ 
                     }  
                     while (err.available() > 0) {  
-                        Character c = new Character((char) err.read());  
-                        System.out.print(c);  
+                      /*Character c = new Character((char) err.read());  
+                        System.out.print(c); */ 
                     }  
    
                     exitValue = p.exitValue();  
