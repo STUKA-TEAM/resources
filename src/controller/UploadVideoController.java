@@ -7,10 +7,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import model.TempVideo;
 import model.dao.TempVideoDAO;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import threads.VideoConvert;
 import tools.Constant;
 import tools.UploadResponseMessage;
 
@@ -34,16 +38,19 @@ import com.google.gson.Gson;
  * @date 2013年12月29日
  */
 @Controller
+@RequestMapping(value = "/video")
 public class UploadVideoController {
+	ExecutorService threadPool = Executors.newFixedThreadPool(1);	
+	
     /**
      * @Description: 上传视频	
      * @param fileFromForm
      * @return
-     */
-	@RequestMapping(value = "/video", method = RequestMethod.POST)
+     */	
+	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
 	 public String videoUpload(
-        @RequestParam("file") MultipartFile fileFromForm) {
+        @RequestParam("file") MultipartFile fileFromForm) {			
 		UploadResponseMessage responseMessage = new UploadResponseMessage();
 		Gson gson = new Gson();
 		if (!fileFromForm.isEmpty()) {
@@ -68,9 +75,10 @@ public class UploadVideoController {
 						video.setCreateDate(new Timestamp(System.currentTimeMillis()));
 						tempVideoDao.insertVideoTempRecord(video);
 						
-						String videoPath = getVideoPath(relativePathID).substring(1).replace('/', '\\');					
-						new Thread(new VideoConvert(videoType, videoPath)).start();	
+						String videoPath = getVideoPath(relativePathID).substring(1).replace('/', '\\');
+						threadPool.submit(new VideoConvert(videoType, videoPath));
 						
+					//	threadPool.shutdown();
 						responseMessage.setStatus(true);
 						responseMessage.setMessage("上传成功！");
 						responseMessage.setLink(relativePathID);
