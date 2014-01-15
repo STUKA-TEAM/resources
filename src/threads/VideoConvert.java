@@ -171,12 +171,14 @@ public class VideoConvert implements Runnable {
             while (!finished) {  
                 try {  
                     while (in.available() > 0) {  
-                        Character c = new Character((char) in.read());  
-                        System.out.print(c);  
+                        /*Character c = new Character((char) in.read());  
+                        System.out.print(c);  */
+                    	in.read();
                     }  
                     while (err.available() > 0) {  
-                        Character c = new Character((char) err.read());  
-                        System.out.print(c);  
+                        /*Character c = new Character((char) err.read());  
+                        System.out.print(c);*/
+                    	err.read();
                     }  
    
                     exitValue = p.exitValue();  

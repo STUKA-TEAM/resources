@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import model.TempVideo;
 import model.dao.TempVideoDAO;
@@ -40,7 +39,8 @@ import com.google.gson.Gson;
 @Controller
 @RequestMapping(value = "/video")
 public class UploadVideoController {
-	ExecutorService threadPool = Executors.newFixedThreadPool(1);	
+	@Autowired
+	private ExecutorService threadPool;	
 	
     /**
      * @Description: 上传视频	
@@ -78,7 +78,6 @@ public class UploadVideoController {
 						String videoPath = getVideoPath(relativePathID).substring(1).replace('/', '\\');
 						threadPool.submit(new VideoConvert(videoType, videoPath));
 						
-					//	threadPool.shutdown();
 						responseMessage.setStatus(true);
 						responseMessage.setMessage("上传成功！");
 						responseMessage.setLink(relativePathID);
