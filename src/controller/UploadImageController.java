@@ -1,8 +1,12 @@
 package controller;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 import model.TempImage;
 import model.dao.TempImageDAO;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import tools.CommonValidationTools;
+import tools.Constant;
 import tools.ImageUtil;
 import tools.UploadResponseMessage;
 
@@ -40,7 +45,7 @@ public class UploadImageController {
 	@RequestMapping(value = "/image/multi", method = RequestMethod.POST)
 	@ResponseBody
 	 public String multiImageUpload(@RequestParam("file") MultipartFile fileFromForm) {
-		UploadResponseMessage responseMessage = new UploadResponseMessage();
+		  UploadResponseMessage responseMessage = new UploadResponseMessage();
 		  Gson gson = new Gson();
 		  if (!fileFromForm.isEmpty()) {
               try {
@@ -88,9 +93,8 @@ public class UploadImageController {
 	 */
 	@RequestMapping(value = "/image/original", method = RequestMethod.POST)
 	@ResponseBody
-	 public String originalImageUpload(
-        @RequestParam("file") MultipartFile fileFromForm) {
-		UploadResponseMessage responseMessage = new UploadResponseMessage();
+	 public String originalImageUpload(@RequestParam("file") MultipartFile fileFromForm) {
+		  UploadResponseMessage responseMessage = new UploadResponseMessage();
 		  Gson gson = new Gson();
 		  if (!fileFromForm.isEmpty()) {
               try {
@@ -133,15 +137,14 @@ public class UploadImageController {
     }
 	
 	/**
-	 * @Description: 上传图片仅存储为原始大小尺寸且为png格式
+	 * @Description: 上传png图片, 直接保存
 	 * @param fileFromForm
 	 * @return
 	 */
-	@RequestMapping(value = "/image/original_png", method = RequestMethod.POST)
+	@RequestMapping(value = "/image/copy_png", method = RequestMethod.POST)
 	@ResponseBody
-	 public String originalImageUploadForPNG(
-        @RequestParam("file") MultipartFile fileFromForm) {
-		UploadResponseMessage responseMessage = new UploadResponseMessage();
+	 public String originalImageUploadForPNG(@RequestParam("file") MultipartFile fileFromForm) {
+		  UploadResponseMessage responseMessage = new UploadResponseMessage();
 		  Gson gson = new Gson();
 		  if (!fileFromForm.isEmpty()) {
               try {
@@ -150,8 +153,7 @@ public class UploadImageController {
 					responseMessage.setStatus(false);
 					responseMessage.setMessage("文件大小超过限制！");
 				} else {
-					ImageUtil imageUtil = new ImageUtil();
-					String relativePathID = imageUtil.saveOriginalSizeForPNG(inputStream);
+					String relativePathID = saveImageFile(inputStream, Constant.ORIGINAL_IMAGE_PNG);
 					if (relativePathID != "") {
 						ApplicationContext context = 
 								new ClassPathXmlApplicationContext("All-Modules.xml");
@@ -190,9 +192,8 @@ public class UploadImageController {
 	 */
 	@RequestMapping(value = "/image/square", method = RequestMethod.POST)
 	@ResponseBody
-	 public String squareImageUpload(
-        @RequestParam("file") MultipartFile fileFromForm) {
-		UploadResponseMessage responseMessage = new UploadResponseMessage();
+	 public String squareImageUpload(@RequestParam("file") MultipartFile fileFromForm) {
+		  UploadResponseMessage responseMessage = new UploadResponseMessage();
 		  Gson gson = new Gson();
 		  if (!fileFromForm.isEmpty()) {
               try {
@@ -233,4 +234,45 @@ public class UploadImageController {
 		  }
 		  return gson.toJson(responseMessage); 
     }	
+	
+	/**
+	 * @title: saveImageFile
+	 * @description: 把图片文件存储到服务器上
+	 * @param input
+	 * @param audioType
+	 * @return
+	 */
+	private String saveImageFile(InputStream input, String imageType){
+		try {
+			String imageID = generateRandomImageID();
+			String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
+			
+			//save to server
+			String classPath = this.getClass().getClassLoader().getResource("/").getPath();
+			String savePath = classPath.replaceAll("/WEB-INF/classes/", Constant.IMAGE_NORMAL_PATH);
+			File file = new File(savePath + imageID + "." + imageType);
+			OutputStream out=new FileOutputStream(file);
+			int read = 0;
+			byte[] bytes = new byte[1024];			 
+			while ((read = input.read(bytes)) != -1) {
+			 out.write(bytes, 0, read);
+			}
+			out.close();
+			input.close();
+			
+			return saveInDataBase;
+		} catch (IOException e) {
+			return "";
+		}
+	}
+	
+	/**
+     * @title: generateRandomImageID
+     * @description: 生成文件名
+     * @return
+     */
+    private static String generateRandomImageID() {    	
+        String randomImageID = UUID.randomUUID().toString().replace("-", "");
+        return randomImageID;
+    }
 }

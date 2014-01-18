@@ -79,29 +79,6 @@ public class ImageUtil {
 	}
 	
 	/**
-	 * @Description: 只生成原始尺寸大小的png格式图片
-	 * @param input
-	 * @return
-	 */
-	public String saveOriginalSizeForPNG(InputStream input){
-		try {
-			String imageID = generateRandomImageID();
-			String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
-			
-			Boolean saveOrigin = scaleRatio(input, Constant.ORIGINAL_IMAGE_WIDTH, 
-					imageID, Constant.ORIGINAL_IMAGE_PNG); 
-			
-			if(saveOrigin){
-				return saveInDataBase;
-			}else {
-				return "";
-			}
-		} catch (Exception e) {
-			return "";
-		}
-	}
-	
-	/**
 	 * @Description: 只生成正方形大小的图片   specially for elove
 	 * @param input
 	 * @return
