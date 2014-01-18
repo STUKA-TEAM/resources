@@ -24,11 +24,11 @@ public final class Constant {
     public static final int SQUARE_LENGTH = 300;
     //处理过的原始图片，定宽为360px，长宽比不变;
     public static final String ORIGINAL_IMAGE = "_original.jpg";
-    public static final int ORIGINAL_IMAGE_WIDTH = 360;
+    public static final int ORIGINAL_IMAGE_WIDTH = 450;
     //要放入360px*200px区域的图片,主要是图文消息的图;
     public static final String STANDARD_IMAGE = "_standard.jpg";
-    public static final int STANDARD_IMAGE_WIDTH = 360;
-    public static final int STANDARD_IMAGE_HEIGHT = 175;
+    public static final int STANDARD_IMAGE_WIDTH = 540;
+    public static final int STANDARD_IMAGE_HEIGHT = 262;
     //缩略图，形状为正方形，边长为50px;
     public static final String SMALL_IMAGE = "_small.jpg";
     public static final int SAMLL_IMAGE_WIDTH = 65;
