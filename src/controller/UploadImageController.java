@@ -250,7 +250,7 @@ public class UploadImageController {
 			//save to server
 			String classPath = this.getClass().getClassLoader().getResource("/").getPath();
 			String savePath = classPath.replaceAll("/WEB-INF/classes/", Constant.IMAGE_NORMAL_PATH);
-			File file = new File(savePath + imageID + "." + imageType);
+			File file = new File(savePath + imageID + imageType);
 			OutputStream out=new FileOutputStream(file);
 			int read = 0;
 			byte[] bytes = new byte[1024];			 
