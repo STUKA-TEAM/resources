@@ -37,7 +37,7 @@ public class ImageUtil {
 			org.apache.commons.io.IOUtils.copy(input, baos);
 			byte[] bytes = baos.toByteArray();
 			Boolean saveOrigin = scaleRatio(new ByteArrayInputStream(bytes), Constant.ORIGINAL_IMAGE_WIDTH, 
-					imageID, Constant.ORIGINAL_IMAGE); 
+					imageID, Constant.ORIGINAL_IMAGE_JPG); 
 			
 			Boolean saveStandard = scaleCut(new ByteArrayInputStream(bytes), Constant.STANDARD_IMAGE_WIDTH, 
 					Constant.STANDARD_IMAGE_HEIGHT, imageID, Constant.STANDARD_IMAGE);
@@ -56,7 +56,7 @@ public class ImageUtil {
 	}
 	
 	/**
-	 * @Description: 只生成原始尺寸大小的图片
+	 * @Description: 只生成原始尺寸大小的jpg格式图片
 	 * @param input
 	 * @return
 	 */
@@ -66,7 +66,30 @@ public class ImageUtil {
 			String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
 			
 			Boolean saveOrigin = scaleRatio(input, Constant.ORIGINAL_IMAGE_WIDTH, 
-					imageID, Constant.ORIGINAL_IMAGE); 
+					imageID, Constant.ORIGINAL_IMAGE_JPG); 
+			
+			if(saveOrigin){
+				return saveInDataBase;
+			}else {
+				return "";
+			}
+		} catch (Exception e) {
+			return "";
+		}
+	}
+	
+	/**
+	 * @Description: 只生成原始尺寸大小的png格式图片
+	 * @param input
+	 * @return
+	 */
+	public String saveOriginalSizeForPNG(InputStream input){
+		try {
+			String imageID = generateRandomImageID();
+			String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
+			
+			Boolean saveOrigin = scaleRatio(input, Constant.ORIGINAL_IMAGE_WIDTH, 
+					imageID, Constant.ORIGINAL_IMAGE_PNG); 
 			
 			if(saveOrigin){
 				return saveInDataBase;
@@ -255,16 +278,14 @@ public class ImageUtil {
     private Boolean saveNewImage(BufferedImage img, String imageID, String sizeType){
     	try {
 	    		String classPathString = this.getClass().getClassLoader().getResource("/").getPath();  
-	            String savePathString = classPathString.replaceAll("/WEB-INF/classes/", Constant.IMAGE_NORMAL_PATH);           
-	            ImageIO.write(img, Constant.IMAGE_TYPE_JPG, new File(savePathString + 
-	            		imageID + sizeType)); 
+	            String savePathString = classPathString.replaceAll("/WEB-INF/classes/", Constant.IMAGE_NORMAL_PATH); 
+	            String format = sizeType.substring(sizeType.length() - 3);
+	            ImageIO.write(img, format, new File(savePathString + imageID + sizeType)); 
 	            return true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
-		}
-        
+		}      
     }
-    
 
 }
