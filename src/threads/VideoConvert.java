@@ -57,10 +57,10 @@ public class VideoConvert implements Runnable {
 		command.add(ffmpegPath);
 		command.add("-i");
 		command.add(filename + "_temp." + oldType);
-		command.add("-acodec");
+		/*command.add("-acodec");
         command.add("libvo_aacenc");
 		command.add("-vcodec");
-        command.add("libx264");;
+        command.add("libx264");*/
 		command.add("-threads");
 		command.add("1");
 		command.add(filename + ".mp4");
@@ -93,14 +93,14 @@ public class VideoConvert implements Runnable {
 		command.add(ffmpegPath);
 		command.add("-i");
 		command.add(filename + "_temp." + oldType);
-        command.add("-acodec");
-        command.add("libvorbis");
+        /*command.add("-acodec");
+        command.add("libvorbis");*/
 		command.add("-aq");
 		command.add("5");
 		command.add("-ac");
 		command.add("2");
-		command.add("-vcodec");
-        command.add("libvpx");
+		/*command.add("-vcodec");
+        command.add("libvpx");*/
 		command.add("-qmax");
 		command.add("25");
 		command.add("-threads");

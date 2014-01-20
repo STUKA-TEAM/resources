@@ -75,7 +75,7 @@ public class UploadVideoController {
 						video.setCreateDate(new Timestamp(System.currentTimeMillis()));
 						tempVideoDao.insertVideoTempRecord(video);
 						
-						String videoPath = getVideoPath(relativePathID).substring(1).replace('/', '\\');
+						String videoPath = getVideoPath(relativePathID);
 						threadPool.submit(new VideoConvert(videoType, videoPath));
 						
 						responseMessage.setStatus(true);
