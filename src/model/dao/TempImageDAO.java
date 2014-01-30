@@ -31,7 +31,7 @@ public class TempImageDAO {
 	 */
 	public int insertImageTempRecord(TempImage image){
 		int result = 0;
-		String SQL = "INSERT INTO image_temp_record VALUES (default, ?, ?)";
+		String SQL = "INSERT INTO image_temp_record (id, imagePath, createDate) VALUES (default, ?, ?)";
 		
 		result = jdbcTemplate.update(SQL, image.getImagePath(), image.getCreateDate());
 		
