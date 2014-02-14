@@ -31,7 +31,7 @@ public class TempVideoDAO {
 	 */
 	public int insertVideoTempRecord(TempVideo video){
 		int result = 0;
-		String SQL = "INSERT INTO video_temp_record VALUES (default, ?, ?)";
+		String SQL = "INSERT INTO video_temp_record (id, videoPath, createDate) VALUES (default, ?, ?)";
 		
 		result = jdbcTemplate.update(SQL, video.getVideoPath(), video.getCreateDate());
 		
