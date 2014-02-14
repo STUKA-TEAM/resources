@@ -6,11 +6,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
 
 import model.TempImage;
 import model.dao.TempImageDAO;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileItemIterator;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -24,9 +36,12 @@ import org.springframework.web.multipart.MultipartFile;
 import tools.CommonValidationTools;
 import tools.Constant;
 import tools.ImageUtil;
+import tools.KindEditorErrorMes;
+import tools.KindEditorSuccessMes;
 import tools.UploadResponseMessage;
 
 import com.google.gson.Gson;
+import com.sun.org.apache.bcel.internal.generic.GOTO;
 
 /**
  * @Title: UploadImageController
@@ -234,6 +249,68 @@ public class UploadImageController {
 		  }
 		  return gson.toJson(responseMessage); 
     }	
+	
+    /**
+     * @Description: 上传图片存储为三种大小尺寸,来源为KindEditor编辑器	
+     * @param fileFromForm
+     * @return
+     */
+	@RequestMapping(value = "/image/kindeditor", method = RequestMethod.POST)
+	@ResponseBody
+	 public String kindEditorImageUpload(HttpServletRequest request) {
+
+		try {
+			FileItemFactory factory = new DiskFileItemFactory();
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			upload.setHeaderEncoding("UTF-8");
+			List items = upload.parseRequest(request);
+			Iterator itr = items.iterator();
+			while (itr.hasNext()) {
+				FileItem item = (FileItem) itr.next();
+					if (!item.isFormField()) {
+						InputStream inputStream = item.getInputStream();
+						//检查文件大小
+						if(!CommonValidationTools.checkImageSizeFromFileItem(item)){
+							return getError("文件大小超过限制！");
+						}else {
+							ImageUtil imageUtil = new ImageUtil();
+							String relativePathID = imageUtil.saveMutiSize(inputStream);
+							if (relativePathID != "") {
+								ApplicationContext context = 
+										new ClassPathXmlApplicationContext("All-Modules.xml");
+								TempImageDAO tempImageDao = (TempImageDAO) context.getBean("TempImageDAO");
+								((ConfigurableApplicationContext)context).close();
+								
+								TempImage image = new TempImage();
+								image.setImagePath(relativePathID);
+								image.setCreateDate(new Timestamp(System.currentTimeMillis()));
+								tempImageDao.insertImageTempRecord(image);
+								
+								KindEditorSuccessMes kindEditorSuccessMes = new KindEditorSuccessMes();
+								kindEditorSuccessMes.setError(0);
+								kindEditorSuccessMes.setUrl(relativePathID + Constant.ORIGINAL_IMAGE_JPG);
+								Gson gson = new Gson();
+				                return gson.toJson(kindEditorSuccessMes);
+							} else {
+								return getError("文件保存失败，请重新上传！");
+							}						
+						}
+					}
+			}
+		return getError("请选择图片！");
+		} catch (Exception e) {
+			return getError("文件保存失败，请重新上传！");
+		}
+
+    }	
+	
+	 private String getError(String message) {  
+		 	KindEditorErrorMes kindEditorErrorMes = new KindEditorErrorMes();
+		 	kindEditorErrorMes.setError(1);
+		 	kindEditorErrorMes.setMessage(message);
+		 	Gson gson = new Gson();	        
+	        return gson.toJson(kindEditorErrorMes);  
+	    } 
 	
 	/**
 	 * @title: saveImageFile

@@ -33,6 +33,6 @@
    </bean>  
 
 <bean id="multipartResolver"
-class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+class="tools.MyCommonsMultipartResolver">
 </bean>
 </beans>

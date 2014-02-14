@@ -3,6 +3,7 @@ package tools;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.fileupload.FileItem;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -51,6 +52,20 @@ public class CommonValidationTools {
 			return true;
 		}
 	}
+	
+	/**
+	 * 
+	 * @param multipartFile
+	 * @return 是否超过2MB
+	 */
+	public static boolean checkImageSizeFromFileItem(FileItem fileItem) {
+		//不能超过 2MB
+		if(fileItem.getSize() > 2100000){
+			return false;
+		}else {
+			return true;
+		}
+	}	
 	
 	/**
 	 * 
