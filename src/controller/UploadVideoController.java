@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import threads.VideoConvert;
 import tools.Constant;
+import tools.OSUtil;
 import tools.UploadResponseMessage;
 
 import com.google.gson.Gson;
@@ -76,6 +77,9 @@ public class UploadVideoController {
 						tempVideoDao.insertVideoTempRecord(video);
 						
 						String videoPath = getVideoPath(relativePathID);
+						if (OSUtil.isWindows()) {
+							videoPath = videoPath.substring(1);
+						}
 						threadPool.submit(new VideoConvert(videoType, videoPath));
 						
 						responseMessage.setStatus(true);
