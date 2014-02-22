@@ -9,6 +9,8 @@ package tools;
  */
 public final class Constant {
 	/*image*/
+	public static final String ICON_LIB = "/icon_lib/";
+	public static final String ICON_LIB_PATH = "/resources/icon_lib/";
 	public static final String IMAGE_NORMAL_PATH = "/images/";
 	public static final String IMAGE_DATABASE_PATH = "/resources/images/";
 	public static final String IMAGE_TYPE_GIF = "gif";

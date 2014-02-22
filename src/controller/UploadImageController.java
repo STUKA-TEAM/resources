@@ -1,16 +1,16 @@
 package controller;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,13 +20,13 @@ import model.dao.TempImageDAO;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,10 +38,10 @@ import tools.Constant;
 import tools.ImageUtil;
 import tools.KindEditorErrorMes;
 import tools.KindEditorSuccessMes;
+import tools.OSUtil;
 import tools.UploadResponseMessage;
 
 import com.google.gson.Gson;
-import com.sun.org.apache.bcel.internal.generic.GOTO;
 
 /**
  * @Title: UploadImageController
@@ -87,7 +87,7 @@ public class UploadImageController {
 						responseMessage.setLink(relativePathID);
 					} else {
 						responseMessage.setStatus(false);
-						responseMessage.setMessage("文件保存失败，请重新上传");					
+						responseMessage.setMessage("文件保存失败，请重新上传!");					
 					}				
 				}				
 			} catch (IOException e) {
@@ -136,7 +136,7 @@ public class UploadImageController {
 						responseMessage.setLink(relativePathID);
 					} else {
 						responseMessage.setStatus(false);
-						responseMessage.setMessage("文件保存失败，请重新上传");	
+						responseMessage.setMessage("文件保存失败，请重新上传!");	
 					}
 				}
 				
@@ -185,7 +185,7 @@ public class UploadImageController {
 						responseMessage.setLink(relativePathID);
 					} else {
 						responseMessage.setStatus(false);
-						responseMessage.setMessage("文件保存失败，请重新上传");	
+						responseMessage.setMessage("文件保存失败，请重新上传!");	
 					}
 				}
 				
@@ -235,7 +235,7 @@ public class UploadImageController {
 						responseMessage.setLink(relativePathID);
 					} else {
 						responseMessage.setStatus(false);
-						responseMessage.setMessage("文件保存失败，请重新上传");	
+						responseMessage.setMessage("文件保存失败，请重新上传!");	
 					}					
 				}
 				
@@ -249,6 +249,93 @@ public class UploadImageController {
 		  }
 		  return gson.toJson(responseMessage); 
     }	
+	
+	/**
+	 * @description: 获取icon_lib下的图片路径列表
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value = "/image/iconlib/list", method = RequestMethod.GET)
+	@ResponseBody
+	public String getIconLib(Model model) {
+		String classPath = this.getClass().getClassLoader().getResource("/")
+				.getPath();
+		String targetFolder = classPath.replaceAll("/WEB-INF/classes/",
+				Constant.ICON_LIB);
+
+		List<String> nameList = new ArrayList<String>();
+		File folder = new File(targetFolder);
+		if (folder.isDirectory()) {
+			File[] images = folder.listFiles();
+			for (int i = 0; i < images.length; i++) {
+				String filePath = images[i].getAbsolutePath();
+				if (OSUtil.isWindows()) {
+					filePath = filePath.replaceAll("\\\\", "/");
+				}
+				int beginIndex = filePath.lastIndexOf("/") + 1;
+				filePath = Constant.ICON_LIB_PATH
+						+ filePath.substring(beginIndex);
+				nameList.add(filePath);
+			}
+		}
+
+		Gson gson = new Gson();
+		String response = gson.toJson(nameList);
+		return response;
+	}
+	
+	/**
+	 * @Description: 拷贝png文件到另外一个路径下，并改后缀为jpg
+	 * @param filepath
+	 * @return
+	 */
+	@RequestMapping(value = "/image/iconlib/copy", method = RequestMethod.POST)
+	@ResponseBody
+	 public String copyIconLibImage(@RequestParam("filepath") String filepath) {
+		String classPath = this.getClass().getClassLoader().getResource("/")
+				.getPath();
+		String srcFolder = classPath.replaceAll("/WEB-INF/classes/",
+				Constant.ICON_LIB);
+		filepath = filepath.replaceAll(Constant.ICON_LIB_PATH, srcFolder);
+
+		Gson gson = new Gson();
+		UploadResponseMessage responseMessage = new UploadResponseMessage();
+
+		File srcImage = new File(filepath);
+		InputStream input = null;
+		try {
+			input = new FileInputStream(srcImage);
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+		}
+		
+		if (input != null) {		
+			String relativePathID = saveImageFile(input, Constant.SMALL_IMAGE);
+			if (relativePathID != "") {
+				ApplicationContext context = new ClassPathXmlApplicationContext(
+						"All-Modules.xml");
+				TempImageDAO tempImageDao = (TempImageDAO) context
+						.getBean("TempImageDAO");
+				((ConfigurableApplicationContext) context).close();
+
+				TempImage image = new TempImage();
+				image.setImagePath(relativePathID);
+				image.setCreateDate(new Timestamp(System.currentTimeMillis()));
+				tempImageDao.insertImageTempRecord(image);
+
+				responseMessage.setStatus(true);
+				responseMessage.setMessage("上传成功！");
+				responseMessage.setLink(relativePathID);
+			} else {
+				responseMessage.setStatus(false);
+				responseMessage.setMessage("文件保存失败，请重新上传!");
+			}
+		} else {
+			responseMessage.setStatus(false);
+			responseMessage.setMessage("请选择有效文件！");
+		}
+        return gson.toJson(responseMessage);   
+    }
 	
     /**
      * @Description: 上传图片存储为三种大小尺寸,来源为KindEditor编辑器	
