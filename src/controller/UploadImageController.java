@@ -310,7 +310,7 @@ public class UploadImageController {
 		}
 		
 		if (input != null) {		
-			String relativePathID = saveImageFile(input, Constant.SMALL_IMAGE);
+			String relativePathID = saveImageFile(input, Constant.ORIGINAL_IMAGE_JPG);
 			if (relativePathID != "") {
 				ApplicationContext context = new ClassPathXmlApplicationContext(
 						"All-Modules.xml");
