@@ -123,7 +123,7 @@ public class ImageUtil {
 
             // 生成新的图像
             Image image = src.getScaledInstance(width, height,
-                    Image.SCALE_DEFAULT);
+                    Image.SCALE_SMOOTH);
             BufferedImage img = drawPicture(width, height, image);
 
             return saveNewImage(img, imageID, sizeType);
