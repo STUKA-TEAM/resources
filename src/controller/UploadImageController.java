@@ -338,7 +338,7 @@ public class UploadImageController {
     }
 	
     /**
-     * @Description: 上传图片存储为三种大小尺寸,来源为KindEditor编辑器	
+     * @Description: 上传图片存储为原始大小尺寸,来源为KindEditor编辑器	
      * @param fileFromForm
      * @return
      */
@@ -361,7 +361,7 @@ public class UploadImageController {
 							return getError("文件大小超过限制！");
 						}else {
 							ImageUtil imageUtil = new ImageUtil();
-							String relativePathID = imageUtil.saveMutiSize(inputStream);
+							String relativePathID = imageUtil.saveOriginalSize(inputStream);
 							if (relativePathID != "") {
 								ApplicationContext context = 
 										new ClassPathXmlApplicationContext("All-Modules.xml");
