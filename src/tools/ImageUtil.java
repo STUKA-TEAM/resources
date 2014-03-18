@@ -6,10 +6,10 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
@@ -33,19 +33,18 @@ public class ImageUtil {
 			String imageID = generateRandomImageID();
 			String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
 			
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			org.apache.commons.io.IOUtils.copy(input, baos);
-			byte[] bytes = baos.toByteArray();
-			Boolean saveOrigin = scaleRatio(new ByteArrayInputStream(bytes), Constant.ORIGINAL_IMAGE_WIDTH, 
+			File file = inputstreamToFile(input);
+			Boolean saveOrigin = scaleRatio(file, Constant.ORIGINAL_IMAGE_WIDTH, 
 					imageID, Constant.ORIGINAL_IMAGE_JPG); 
 			
-			Boolean saveStandard = scaleCut(new ByteArrayInputStream(bytes), Constant.STANDARD_IMAGE_WIDTH, 
+			Boolean saveStandard = scaleCut(file, Constant.STANDARD_IMAGE_WIDTH, 
 					Constant.STANDARD_IMAGE_HEIGHT, imageID, Constant.STANDARD_IMAGE);
 			
-			Boolean saveSmall = scaleCut(new ByteArrayInputStream(bytes), Constant.SAMLL_IMAGE_WIDTH, 
+			Boolean saveSmall = scaleCut(file, Constant.SAMLL_IMAGE_WIDTH, 
 					Constant.SAMLL_IMAGE_WIDTH, imageID, Constant.SMALL_IMAGE);
 			
-			if (saveOrigin && saveStandard && saveSmall) {
+			Boolean deleteTemp = file.delete();	
+			if (saveOrigin && saveStandard && saveSmall && deleteTemp) {
 				return saveInDataBase;
 			} else {
 				return "";
@@ -65,10 +64,12 @@ public class ImageUtil {
 			String imageID = generateRandomImageID();
 			String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
 			
-			Boolean saveOrigin = scaleRatio(input, Constant.ORIGINAL_IMAGE_WIDTH, 
+			File file = inputstreamToFile(input);
+			Boolean saveOrigin = scaleRatio(file, Constant.ORIGINAL_IMAGE_WIDTH, 
 					imageID, Constant.ORIGINAL_IMAGE_JPG); 
 			
-			if(saveOrigin){
+			Boolean deleteTemp = file.delete();	
+			if(saveOrigin && deleteTemp){
 				return saveInDataBase;
 			}else {
 				return "";
@@ -88,10 +89,12 @@ public class ImageUtil {
 			String imageID = generateRandomImageID();
 			String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
 			
-			Boolean saveSquare = scaleCut(input, Constant.SQUARE_LENGTH, 
+			File file = inputstreamToFile(input);
+			Boolean saveSquare = scaleCut(file, Constant.SQUARE_LENGTH, 
 					Constant.SQUARE_LENGTH, imageID, Constant.BIG_SQUARE);
 			
-			if (saveSquare) {
+			Boolean deleteTemp = file.delete();		
+			if (saveSquare && deleteTemp) {
 				return saveInDataBase;
 			}else {
 				return "";
@@ -109,10 +112,10 @@ public class ImageUtil {
  * @param sizeType 	图片存储规格			
  * @return
  */
-    private Boolean scaleRatio(InputStream srcImage, int destWidth, String imageID, String sizeType) {
+    private Boolean scaleRatio(File srcImage, int destWidth, String imageID, String sizeType) {
         try {
             // 获取源图像长宽
-            BufferedImage src = ImageIO.read(srcImage);
+        	BufferedImage src = new JpegReader().readImage(srcImage);
             int width = src.getWidth();
             int height = src.getHeight();
             double ratio = (double)destWidth / width;
@@ -128,8 +131,7 @@ public class ImageUtil {
 
             return saveNewImage(img, imageID, sizeType);
         } catch (Exception e) {
-            // TODO: handle exception
-        	e.printStackTrace();
+            System.out.println(e.getMessage());
         	return false;
         }
     }
@@ -143,11 +145,11 @@ public class ImageUtil {
  * @param sizeType 图片存储规格
  * @return
  */
-    private Boolean scaleCut(InputStream srcImage, int destWidth, int destHeight,
+    private Boolean scaleCut(File srcImage, int destWidth, int destHeight,
     		 String imageID, String sizeType) {
         try {
             // 获取源图像长宽
-            BufferedImage src = ImageIO.read(srcImage);
+        	BufferedImage src = new JpegReader().readImage(srcImage);
             int srcWidth = src.getWidth();
             int srcHeight = src.getHeight();
 
@@ -205,7 +207,7 @@ public class ImageUtil {
                 return saveNewImage(transImg, imageID, sizeType);
             }
         } catch (Exception e) {
-        	e.printStackTrace();
+        	System.out.println(e.getMessage());
             return false;
         }
     }
@@ -219,7 +221,6 @@ public class ImageUtil {
      * @return BufferedImage
      */
     private BufferedImage drawPicture(int width, int height, Image image) {
-        // TODO Auto-generated method stub
         BufferedImage newImage = new BufferedImage(width, height,
                 BufferedImage.TYPE_INT_RGB);
         Graphics graphics = newImage.getGraphics();
@@ -229,24 +230,16 @@ public class ImageUtil {
     }
 
     /**
-     * 
+     * @title generateRandomImageID
      * @return 返回图片ID
      */
-    private String generateRandomImageID() {
-        // TODO Auto-generated method stub
-        /** currentTime + randomNumber */
-        /*
-         * long current = System.currentTimeMillis(); Random rand = new
-         * Random(); int random = rand.nextInt(10000000); String randomImageName
-         * = current + String.format("%07d", random) + "." + imageType;
-         */
-    	
+    private String generateRandomImageID() {  	
         String randomImageID = UUID.randomUUID().toString().replace("-", "");
         return randomImageID;
     }
     
 /**
- * 
+ * @title saveNewImage
  * @param img 图片输入流
  * @param imageID 图片ID
  * @param size 图片规格
@@ -260,9 +253,34 @@ public class ImageUtil {
 	            ImageIO.write(img, format, new File(savePathString + imageID + sizeType)); 
 	            return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 			return false;
 		}      
     }
-
+    
+    /**
+     * @title inputstreamToFile
+     * @param ins
+     * @return
+     */
+	private File inputstreamToFile(InputStream ins) {
+		String pathname = this.getClass().getClassLoader().getResource("/")
+				.getPath()
+				.replaceAll("/WEB-INF/classes/", Constant.IMAGE_NORMAL_PATH)
+				+ generateRandomImageID() + "_temp";
+		File file = new File(pathname);
+		try {
+			OutputStream os = new FileOutputStream(file);
+			int bytesRead = 0;
+			byte[] buffer = new byte[8192];
+			while ((bytesRead = ins.read(buffer, 0, 8192)) != -1) {
+				os.write(buffer, 0, bytesRead);
+			}
+			os.close();
+			ins.close();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return file;
+	}
 }
