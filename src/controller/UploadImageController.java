@@ -356,7 +356,10 @@ public class UploadImageController {
     /**
      * @Description: 上传图片存储为原始大小尺寸,来源为KindEditor编辑器	
      * @param fileFromForm
-     * @return    @SuppressWarnings("rawtypes")	@RequestMapping(value = "/image/kindeditor", method = RequestMethod.POST)
+     * @return
+     */    
+	@SuppressWarnings("rawtypes")	
+	@RequestMapping(value = "/image/kindeditor", method = RequestMethod.POST)
 	@ResponseBody
 	public String kindEditorImageUpload(HttpServletRequest request) {
 		try {
@@ -367,11 +370,37 @@ public class UploadImageController {
 			Iterator itr = items.iterator();
 			while (itr.hasNext()) {
 				FileItem item = (FileItem) itr.next();
+					if (!item.isFormField()) {
+						InputStream inputStream = item.getInputStream();
+						//检查文件大小
+						if(!CommonValidationTools.checkImageSizeFromFileItem(item)){
+							return getError("文件大小超过限制！");
+						}else {
+							ImageUtil imageUtil = new ImageUtil();
+							String relativePathID = imageUtil.saveOriginalSize(inputStream);
+							if (relativePathID != "") {
+								ApplicationContext context = 
+										new ClassPathXmlApplicationContext("All-Modules.xml");
+								TempImageDAO tempImageDao = (TempImageDAO) context.getBean("TempImageDAO");
+								((ConfigurableApplicationContext)context).close();
+								
+								TempImage image = new TempImage();
+								image.setImagePath(relativePathID);
+								image.setCreateDate(new Timestamp(System.currentTimeMillis()));
+								tempImageDao.insertImageTempRecord(image);
+								
+								KindEditorSuccessMes kindEditorSuccessMes = new KindEditorSuccessMes();
+								kindEditorSuccessMes.setError(0);
+								kindEditorSuccessMes.setUrl(relativePathID + Constant.ORIGINAL_IMAGE_JPG);
+								Gson gson = new Gson();
+				                return gson.toJson(kindEditorSuccessMes);
+							} else {
+								return getError("文件保存失败，请重新上传！");
+							}						
 						}
 					}
-				}
 			}
-			return getError("请选择图片！");
+		return getError("请选择图片！");
 		} catch (Exception e) {
 			return getError("文件保存失败，请重新上传！");
 		}
