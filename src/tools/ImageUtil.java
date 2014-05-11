@@ -104,6 +104,36 @@ public class ImageUtil {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param input
+	 *        图片输入流
+	 * @return 返回存入数据库的图片路径（除去规格和后缀），使用时利用GetSpecificImage类可以构造相应规格的图片可访问路径
+	 */
+		public String saveMutiSquareSize(InputStream input){
+			try{
+				String imageID = generateRandomImageID();
+				String saveInDataBase =  Constant.IMAGE_DATABASE_PATH + imageID;
+				
+				File file = inputstreamToFile(input);
+				Boolean saveBigSquare = scaleCut(file, Constant.SQUARE_LENGTH, 
+						Constant.SQUARE_LENGTH, imageID, Constant.BIG_SQUARE);	
+				
+				Boolean saveSmallSquare = scaleCut(file, Constant.SMALL_SQUARE_LENGTH, 
+						Constant.SMALL_SQUARE_LENGTH, imageID, Constant.SMALL_SQUARE);				
+
+				
+				Boolean deleteTemp = file.delete();	
+				if (saveBigSquare && saveSmallSquare && deleteTemp) {
+					return saveInDataBase;
+				} else {
+					return "";
+				}
+			}catch(Exception e){
+				return "";
+			}		
+		}
+	
 /**
  * 
  * @param srcImage 图片输入流

@@ -266,6 +266,58 @@ public class UploadImageController {
 	}	
 	
 	/**
+	 * @Description: 上传图片存储为两种大小尺寸的方形图
+	 * @param fileFromForm
+	 * @return
+	 */
+	@RequestMapping(value = "/image/multiSquare", method = RequestMethod.POST)
+	@ResponseBody
+	public String multiSquareImageUpload(
+			@RequestParam("file") MultipartFile fileFromForm) {
+		UploadResponseMessage responseMessage = new UploadResponseMessage();
+		Gson gson = new Gson();
+		if (!fileFromForm.isEmpty()) {
+			try {
+				InputStream inputStream = fileFromForm.getInputStream();
+				if (!CommonValidationTools.checkImageSize(fileFromForm)) {
+					responseMessage.setStatus(false);
+					responseMessage.setMessage("文件大小超过限制！");
+				} else {
+					ImageUtil imageUtil = new ImageUtil();
+					String relativePathID = imageUtil.saveMutiSquareSize(inputStream);
+					if (relativePathID != "") {
+						ApplicationContext context = new ClassPathXmlApplicationContext(
+								"All-Modules.xml");
+						TempImageDAO tempImageDao = (TempImageDAO) context
+								.getBean("TempImageDAO");
+						((ConfigurableApplicationContext) context).close();
+
+						TempImage image = new TempImage();
+						image.setImagePath(relativePathID);
+						image.setCreateDate(new Timestamp(System
+								.currentTimeMillis()));
+						tempImageDao.insertImageTempRecord(image);
+
+						responseMessage.setStatus(true);
+						responseMessage.setMessage("上传成功！");
+						responseMessage.setLink(relativePathID);
+					} else {
+						responseMessage.setStatus(false);
+						responseMessage.setMessage("文件保存失败，请重新上传!");
+					}
+				}
+			} catch (IOException e) {
+				responseMessage.setStatus(false);
+				responseMessage.setMessage("上传失败！");
+			}
+		} else {
+			responseMessage.setStatus(false);
+			responseMessage.setMessage("请选择文件！");
+		}
+		return gson.toJson(responseMessage);
+	}	
+	
+	/**
 	 * @description: 获取icon_lib下的图片路径列表
 	 * @param model
 	 * @return

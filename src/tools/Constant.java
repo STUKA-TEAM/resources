@@ -24,6 +24,11 @@ public final class Constant {
     //处理过的原始图片，大小为300px*300px
     public static final String BIG_SQUARE = "_original.jpg";
     public static final int SQUARE_LENGTH = 300;
+    
+    //处理过的原始图片，大小为64px*64px
+    public static final String SMALL_SQUARE = "_small.jpg";
+    public static final int SMALL_SQUARE_LENGTH = 80;
+    
     //处理过的原始图片，定宽为360px，长宽比不变;
     public static final String ORIGINAL_IMAGE_JPG = "_original.jpg";
     public static final String ORIGINAL_IMAGE_PNG = "_original.png";
